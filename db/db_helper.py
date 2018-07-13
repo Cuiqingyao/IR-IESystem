@@ -3,7 +3,7 @@
     @Author: qingyaocui
 """
 import pymysql
-from conf.dbconf import *
+
 
 class DBHepler:
     '''
@@ -47,18 +47,101 @@ class DBHepler:
                              user=self.username,
                              password=self.password,
                              db=self.db_name,
-                             port=self.port)
+                             port=self.port,
+                             charset='utf8')
 
         return connection
 
     def add(self, data):
-        pass
+        '''
+        向数据库中插入数据
+        :param data: 字典格式 "字段名称" :"字段值"
+        :return:
+        '''
+        # 重复检测，如果要插入的数据全部重复则认为重复,直接return
+        if len(self.find_job_id_by_jobmsg(data)) != 0:
+            print('添加失败，招聘条目重复!')
+            return
+        # 构造sql
+        left = 'INSERT INTO jobinfomation('
+        right = ' VALUES ('
+        l = len(data)
+        count = 0
+        for key in data:
+            if count+1 == l:
+                left += key + ')'
+                right += data[key] + ')'
+            else:
+                left += key + ','
+                right += data[key] + ','
+                count+=1
+        sql = left + right
 
-    def update(self, id, data):
-        pass
+        # 执行sql语句
+        conn = self.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+                conn.commit()
+                print("插入数据成功！")
+        finally:
+            self.close_db(conn)
 
-    def delete(self, id):
-        pass
+    def update(self, job_id, data):
+        '''
+        更新数据库
+        :param job_id:要更改的招聘id
+        :param data:更改的数据
+        :return:
+        '''
+        sql = 'UPDATE jobinfomation SET '
+
+        l = len(data)
+        count = 0
+        for key in data:
+            if count + 1 == l:
+                sql += key + '=' + data[key]
+            else:
+                sql += key + '=' + data[key] + ','
+                count += 1
+        sql += ' WHERE job_id=%d' % (job_id)
+
+        conn = self.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+                conn.commit()
+                print("更新数据成功！")
+        finally:
+            self.close_db(conn)
+
+    def find_job_id_by_jobmsg(self, data):
+        '''
+        查询某条符合条件的招聘信息的job_id
+        :return: job_id
+        '''
+
+        sql = 'SELECT job_id FROM jobinfomation WHERE '
+
+        l = len(data)
+        count = 0
+        for key in data:
+            if count + 1 == l:
+                sql += key + '=' + data[key]
+            else:
+                sql += key + '=' + data[key] + ' AND '
+                count += 1
+        # print(sql)
+        conn = self.get_connection()
+        results = None
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+                results = cursor.fetchall()
+        finally:
+            self.close_db(conn)
+        return results
+
 
     def findall(self):
         '''
@@ -75,11 +158,40 @@ class DBHepler:
                 results = cursor.fetchall()
         finally:
             self.close_db(conn)
+
         return results
 
 
-    def find_by_id(self, id):
-        pass
+    def find_fields(self, fields):
+        '''
+        查询某一个字段的所有信息
+        :param field: 某一个字段
+        :return:
+        '''
+
+        if fields:
+            if isinstance(fields,list) or isinstance(fields, tuple):
+
+                if len(fields) > 1:
+                    sql = 'SELECT '+','.join(fields)+' FROM jobinfomation'
+                elif len(fields) == 1:
+                    sql = 'SELECT' + fields[0] + ' FROM jobinfomation'
+                else:
+                    return None
+            else:
+                return None
+        else:
+            return None
+
+        conn = self.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+                results = cursor.fetchall()
+        finally:
+            self.close_db(conn)
+
+        return results
 
     def close_db(self, conn):
         '''
@@ -90,12 +202,3 @@ class DBHepler:
         if conn:
             conn.close()
 
-
-
-# if __name__ == '__main__':
-#     dbhelper = DBHepler(LOCALHOST, USERNAME, PASSWORD, PORT, DATABASE_NAME)
-#     print(dbhelper)
-#     results = dbhelper.findall()
-#     if results:
-#         for result in results:
-#             print(result)
