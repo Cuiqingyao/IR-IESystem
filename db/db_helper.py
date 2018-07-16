@@ -149,17 +149,16 @@ class DBHepler:
         :return: jobinfomation表中的前5条数据
         '''
         sql = "SELECT job_id,com_name,com_type,com_size,busi_type,com_info,com_loc_simple,com_loc_detail,job_title,"+\
-              "salary,release_time,num_of_recruits,academic_require,treatment,job_info FROM jobinfomation LIMIT 5"
+              "salary,release_time,num_of_recruits,academic_require,treatment,job_info FROM jobinfomation "
         conn = self.get_connection()
         results = None
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sql)
-                results = cursor.fetchall()
+                results = cursor.fe
+
         finally:
             self.close_db(conn)
-
-        return results
 
 
     def find_fields(self, fields):

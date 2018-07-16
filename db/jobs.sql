@@ -30,7 +30,7 @@ CREATE TABLE `jobinfomation` (
   `busi_type` varchar(100) DEFAULT NULL,
   `com_info` text,
   `com_loc_simple` varchar(50) DEFAULT NULL,
-  `com_loc_detail` varchar(100) DEFAULT NULL,
+  `com_loc_detail` text,
   `job_title` varchar(100) DEFAULT NULL,
   `salary` varchar(20) DEFAULT NULL,
   `release_time` date DEFAULT NULL,

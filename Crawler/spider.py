@@ -2,16 +2,19 @@
     @Time: 2018/7/11 16:57
     @Author: qingyaocui
 """
-
+# 外部的库
 import requests
 from bs4 import BeautifulSoup
 from requests import RequestException
+# 自己定义的
 from conf.spider_conf import *
 from conf.dbconf import *
 from db.db_helper import DBHepler
+from utils.util import clean_str
+# python多进程库
 from multiprocessing import Pool
 from multiprocessing import Lock
-from utils.util import clean_str
+# python自带的
 import re
 import time
 
@@ -63,12 +66,17 @@ def parse_com_page(html):
     soup = BeautifulSoup(html, 'lxml')
     # 解析com_type, com_size, busi_type字段，加入data_dict字典
     com_msg = soup.select('.cn .msg')
-    if len(com_msg) != 0:
-        contents = com_msg[0].get_text().strip().split('|')
-        if len(contents) == 3:
-            data_dict['com_type'] = '\"' + contents[0].strip() + '\"'
-            data_dict['com_size'] = '\"' + contents[1].strip() + '\"'
-            data_dict['busi_type'] = '\"' + contents[2].strip() + '\"'
+    if com_msg:
+        if len(com_msg) != 0:
+            contents = com_msg[0].get_text().strip().split('|')
+            if len(contents) == 3:
+                data_dict['com_type'] = '\"' + contents[0].strip() + '\"'
+                data_dict['com_size'] = '\"' + contents[1].strip() + '\"'
+                data_dict['busi_type'] = '\"' + contents[2].strip() + '\"'
+            else:
+                data_dict['com_type'] = '\"' + '<unknow>' + '\"'
+                data_dict['com_size'] = '\"' + '<unknow>' + '\"'
+                data_dict['busi_type'] = '\"' + '<unknow>' + '\"'
         else:
             data_dict['com_type'] = '\"' + '<unknow>' + '\"'
             data_dict['com_size'] = '\"' + '<unknow>' + '\"'
@@ -78,13 +86,17 @@ def parse_com_page(html):
         data_dict['com_size'] = '\"' + '<unknow>' + '\"'
         data_dict['busi_type'] = '\"' + '<unknow>' + '\"'
 
+
     # 解析 num_of_recruits, academic_require字段，加入data_dict字典
     require_msg = []
     for item in soup.select('.sp4'):
         require_msg.append(item.text)
-    data_dict['academic_require'] = '\"' + require_msg[1] + '\"'
-    data_dict['num_of_recruits'] = '\"' + require_msg[2] + '\"'
-
+    if len(require_msg) >= 2:
+        data_dict['academic_require'] = '\"' + require_msg[1] + '\"'
+        data_dict['num_of_recruits'] = '\"' + require_msg[2] + '\"'
+    else:
+        data_dict['academic_require'] = '\"' + '<unknow>' + '\"'
+        data_dict['num_of_recruits'] = '\"' + '<unknow>' + '\"'
     # 解析 treatment字段，加入data_dict字典
     data_dict['treatment'] = '暂无'
     treatments_msg = soup.select('.t2')
@@ -141,7 +153,7 @@ def main(academic):
     if id_and_urls:
         l = len(id_and_urls)
         for index, id_and_url in enumerate(id_and_urls):
-            if index % 100 == 0 or (index+1) == l:
+            if (index+1) % 100 == 0 or (index+1) == l:
                 print("详情页爬取完成度：")
                 print("已经爬取: %d条, 共%d" % (index, l))
             job_id = id_and_url[0]
