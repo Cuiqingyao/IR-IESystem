@@ -3,7 +3,6 @@
     @Author: qingyaocui
 """
 import os
-# import numpy as np
 import math
 from utils.util import save_to_json, load_from_json
 from multiprocessing import Pool
@@ -22,78 +21,6 @@ cuts_dir = './data/cuts'
 indexing_dict = load_from_json('./data/indexing.json')
 # 加载词典
 word_dict = load_from_json('./data/dictionary_id.json')
-
-# 这个构建词典的方式，是 词：整个文档集的频率 (感觉没什么用 就放在这里吧)
-def build_word_dictionary(directory, out):
-    '''
-    构建词典
-    :param directory:分词文件目录
-    :param out: json格式的词典
-    :return:
-    '''
-    word_dict = {}
-    files = os.listdir(directory)
-    for file in files:
-        if os.path.isfile(directory + '/' + file):
-            with open(directory + '/' + file, 'r', encoding='utf-8') as f:
-                words = f.readline().split('/')
-                for word in words:
-                    if word in word_dict:
-                        word_dict[word] += 1
-                    else:
-                        word_dict.setdefault(word, 1)
-
-    save_to_json(filename=out, word_dict=word_dict)
-
-
-# 这个构建词典的方式，是 词：id号 在构建向量的时候可以标识位置
-def build_word_dictionary_id(directory, out):
-    '''
-    构建词典 键：word 值:序号
-    :param directory: 分词文件目录
-    :param out: txt格式的词典
-    :return:
-    '''
-    word_dict = {}
-    i = 1
-    files = os.listdir(directory)
-    for file in files:
-        if os.path.isfile(directory + '/' + file):
-            with open(directory + '/' + file, 'r', encoding='utf-8') as f:
-                words = f.readline().split('/')
-                for word in words:
-                    if word not in word_dict:
-                        word_dict.setdefault(word, i)
-                        i += 1
-
-    save_to_json(filename=out, word_dict=word_dict)
-
-
-def indexing(word_dict, directory, out):
-    '''
-    构建倒排索引：{'word1':[d1,d3, ..., dn],'word2':[d2,d4, ..., dm], ...}
-    :param word_dict: 词典
-    :param directory: 分词结果文件目录
-    :param out: indexing.json文件
-    :return:
-    '''
-    files = os.listdir(directory)
-    indexing_dict = {}
-    i = 1
-    l = len(word_dict)
-    for word in word_dict:
-        index_l = []
-        for file in files:
-            if os.path.isfile(directory + '/' + file):
-                with open(directory + '/' + file, 'r', encoding='utf-8') as f:
-                   if word in f.readline().split('/'):
-                       index_l.append(int(file.split('_')[0]))
-
-        print("完成%d" % (i) + '个词，共%d' % (l) + '个词')
-        i += 1
-        indexing_dict[word] = index_l
-
-    save_to_json(filename=out, word_dict=indexing_dict)
 
 def tf(file):
     '''
@@ -130,7 +57,7 @@ def tf_idf(file_out):
     :return:
     '''
 
-
+    print("计算tf_idf向量...")
     # 计算每篇文档的词频得到词频字典 tf_dict
     tf_dict = tf(file_out['file'])
 
@@ -150,19 +77,21 @@ def tf_idf(file_out):
     # np.savetxt(file_out['out'], tf_idf_vec)
 
 
-if __name__ == '__main__':
-    '''
-    整个统计流程分为三步:1.构建词典 2.构建倒排索引 3.计算tf_idf向量
-    '''
+def statistics():
+    # '''
+    # 整个统计流程分为三步:1.构建词典 2.构建倒排索引 3.计算tf_idf向量
+    # '''
+    #
+    # # step 1: 构建词典
+    # # build_word_dictionary(cuts_dir, './data/dictionary.json') 这个感觉没啥用
+    # build_word_dictionary_id(cuts_dir, './data/dictionary_id.json')
+    #
+    # # step 2: 构建倒排索引
+    # indexing(word_dict, cuts_dir, './data/indexing.json')
 
-    # step 1: 构建词典
-    # build_word_dictionary(cuts_dir, './data/dictionary.json') 这个感觉没啥用
-    build_word_dictionary_id(cuts_dir, './data/dictionary_id.json')
-
-    # step 2: 构建倒排索引
-    indexing(word_dict, './data/cuts/', './data/indexing.json')
 
     # step 3: 计算tf_idf向量，稀疏处理
+    print("计算tf_idf向量...")
     files = os.listdir(cuts_dir)
     files_outs = []
     for file in files:
@@ -174,3 +103,4 @@ if __name__ == '__main__':
             files_outs.append(file_out)
     pool = Pool(5)
     pool.map(tf_idf, files_outs)
+    print("全文档集tf_idf向量计算完成！")

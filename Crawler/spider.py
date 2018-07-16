@@ -121,8 +121,6 @@ def parse_com_page(html):
 
     return data_dict
 
-
-
 def main(academic):
     '''
     爬虫程序入口
@@ -172,5 +170,4 @@ if __name__ == '__main__':
     pool.map(main, list(ACADEMIC_REQUIRE_DICT.keys()))
     end = time.time()
     print("总时长：%f" % (end-start))
-
 

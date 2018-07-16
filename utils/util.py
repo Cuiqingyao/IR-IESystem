@@ -66,9 +66,9 @@ def seg_list(sentence, isstop=False, stopwords=None):
         return None
 
 
-def save_to_json(filename, word_dict):
+def save_to_json(filename, data):
     with open(filename, 'w') as f:
-        json.dump(word_dict, f)
+        json.dump(data, f)
 
 def load_from_json(filename):
     with open(filename, 'r') as f:
