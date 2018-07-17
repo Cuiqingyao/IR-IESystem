@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from infoR import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index ),
+    path('search/', views.search),
+    path('detail/(?p<job_id>/d+)/', views.detail),
 ]
+
