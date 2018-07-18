@@ -2,9 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>检索结果</title>
+    <link href="/static/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+	<link href="/static/js/jquery-3.3.1.min.js" />
+	<link href="/static/js/bootstrap.js" />
+
+
+    <style type="text/css">
+        body {
+		   background:#fff;
+		   background-size:cover;
+		   font-family: 'Open Sans', sans-serif;
+		   font-size: 100%;
+		}
+		button{
+		  font-size: 1em;
+		  font-weight: 600;
+		  color: #fff;
+		  padding: 1.3em 0.5em;
+		  width: 22%;
+		  text-align: center;
+		  text-shadow: rgba(80, 80, 80, 0.08) 1px 1px,
+					   rgba(80, 80, 80, 0.07) 2px 2px,
+					   rgba(80, 80, 80, 0.09) 3px 3px,
+					   rgba(80, 80, 80, 0.04) 4px 4px,
+					   rgba(80, 80, 80, 0.06) 5px 5px;
+		  border-radius: 0px 5px 5px 0px;
+		  -webkit-border-radius:0px 5px 5px 0px;
+		  -moz-border-radius:0px 5px 5px 0px;
+		  -o-border-radius:0px 5px 5px 0px;
+		  margin: 0px 0px 0px -4px;
+
+		  cursor:pointer;
+		  border: none;
+		  outline: none;
+		  -webkit-appearance: none;
+		  background: #000;
+
+		}
+		button:hover{
+		 background: #7ac209;
+		}
+		input {
+			font-size: 1em;
+		  font-weight: 600;
+
+		  color: #000;
+		  padding: 1.3em 1em 1.3em 1.5em;
+		  width: 70%;
+		  border-radius: 5px 0px 0px 5px;
+		 -webkit-border-radius: 5px 0px 0px 5px;
+		  -moz-border-radius: 5px 0px 0px 5px;
+		  -o-border-radius: 5px 0px 0px 5px;
+
+		}
+    </style>
 </head>
 <body>
+<div class="search" style="margin-top:30px">
 
+	<div class="s-bar">
+
+	   <form action="/search/">
+		<input type="text" name="keywords" class="search-input" placeholder="请输入要检索的内容" style="color:#000;background:#fff;border:0.5px solid #000;"/>
+		   <button type="submit" style="border:0.5px solid #000;"><span class="glyphicon glyphicon-search" ></span></button>
+	  </form>
+
+	</div>
+</div>
+
+<div style="width:900px;margin:20px auto;">
+    <h1>检索结果为：</h1>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>职位</th>
+            <th>公司名称</th>
+            <th>工作地点</th>
+            <th>薪水</th>
+            <th>相似度</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% if data %}
+            {% for data_item in data %}
+            <tr>
+                <td><a href="/detail/?job_id={{ data_item.job_id }}">{{ data_item.job_title }}</a></td>
+                <td>{{ data_item.com_name }}</td>
+                <td>{{ data_item.com_loc_simple }}</td>
+                <td>{{ data_item.salary }}</td>
+                <td>{{ data_item.sim }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+        </table>
+</div>
 </body>
 </html>

@@ -21,6 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index ),
     path('search/', views.search),
-    path('detail/(?p<job_id>/d+)/', views.detail),
+    path('detail/', views.detail),
 ]
 

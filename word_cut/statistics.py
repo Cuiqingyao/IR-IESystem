@@ -4,8 +4,10 @@
 """
 import os
 import math
-from utils.util import save_to_json, load_from_json
+from utils.util import load_from_json
 from multiprocessing import Pool
+
+
 
 # 词典大小
 dictionary_size = 52444

@@ -60,6 +60,7 @@ def seg_list(sentence, isstop=False, stopwords=None):
                 return results
             else:
                 print("找不到停用词列表！,未加载停用词")
+                return words
         else:
             return words
     else:
